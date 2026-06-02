@@ -1,34 +1,41 @@
-!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html>
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-    <link rel="stylesheet" href="/frontend/medicacoes.css">
+    <title>Medicações Receitadas</title>
+    <link rel="stylesheet" href="/css/medicacoes.css">
 </head>
 <body>
     
-<div class="container">
-<h2>Medicações</h2>
+    <div class="container">
+        <h2>📋 Medicações Receitadas</h2>
+        <div id="lista"></div>
+    </div>
 
-<div id="lista"></div>
-</div>
+    <script>
+        fetch("http://localhost:3000/medicacoes")
+        .then(r => r.json())
+        .then(data => {
+            const div = document.getElementById("lista");
+            div.innerHTML = "";
 
-<script>
-fetch("/medicacoes")
-.then(r => r.json())
-.then(data => {
-    const div = document.getElementById("lista");
+            if(data.length === 0) {
+                div.innerHTML = "<p>Nenhuma medicação receitada ainda.</p>";
+                return;
+            }
 
-    data.forEach(m => {
-        div.innerHTML += `
-        <div class="card">
-            <b>Paciente:</b> ${m.paciente}<br>
-            <b>Diagnóstico:</b> ${m.diagnostico}<br>
-            <b>Medicações:</b> ${m.medicamento}<br>
-            </div>`;
-    });
-});
-</script>
+            data.forEach(m => {
+                div.innerHTML += `
+                <div class="card" style="border: 1px solid #ccc; padding: 10px; margin-bottom: 10px;">
+                    <b>Paciente:</b> ${m.paciente || "Não informado"}<br>
+                    <b>Diagnóstico:</b> ${m.diagnostico || "Não informado"}<br>
+                    <b>Medicações:</b> ${m.medicacao || "Nenhuma medicação listada"}<br>
+                    ${m.obs ? `<b>Observações:</b> ${m.obs}<br>` : ''}
+                </div>`;
+            });
+        })
+        .catch(err => console.error("Erro ao carregar medicações:", err));
+    </script>
 </body>
 </html>

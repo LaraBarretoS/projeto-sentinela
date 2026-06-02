@@ -1,40 +1,85 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-    <link rel="stylesheet" href="/frontend/css/index.css">
+    <title>Hospital Pro</title>
 </head>
 <body>
-    
+
     <div class="container">
         <h2>🏥 Sistema Hospitalar</h2>
-        <input id="usuario" placeholder="Usuário">
-        <input id="senha" placeholder="Senha" type="password">
-        <button onclick="login()">Entrar</button>
+
+        <input
+            id="usuario"
+            placeholder="Usuário"
+        >
+
+        <input
+            id="senha"
+            type="password"
+            placeholder="Senha"
+        >
+
+        <button onclick="login()">
+            Entrar
+        </button>
     </div>
 
-    <script>
+   <script>
+    async function login() {
+        const usuario = document.getElementById("usuario").value;
+        const senha = document.getElementById("senha").value;
 
-        function login(){
-            fetch("http://localhost:3000/login", {
+        // 1. Verificar se a função está sendo chamada
+        console.log("Tentando logar com:", usuario, senha);
+
+        try {
+            const resposta = await fetch("http://localhost:3000/login", {
                 method: "POST",
-                headers: {"Content-Type": "application/json"},
-                body: JSON.stringify({
-                    usuarui: usuario.value,
-                    senha: senha.value
-                })
-            })
-        .then(r => r.json())
-        .then(data => {
-            if(data.tipo ==="triagem") location.href = "triagem.html";
-            if(data.tipo ==="medico") location.href = "medico.html";
-            if(data.tipo ==="atendimento") location.href = "atendimento.html";
-        });
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ usuario, senha })
+            });
+
+            const data = await resposta.json();
+
+            // 2. Verificar o que o servidor respondeu exatamente
+            console.log("Resposta bruta do servidor:", data);
+            alert("O servidor respondeu! Olhe o console (F12). Tipo retornado: " + data.tipo);
+
+            if (!resposta.ok) {
+                alert("Erro no servidor: " + data.erro);
+                return;
+            }
+
+            // 3. Testar as condições limpando espaços invisíveis
+            const tipoUsuario = data.tipo ? data.tipo.trim() : "";
+
+            if (tipoUsuario === "triagem") {
+                console.log("Redirecionando para triagem...");
+                window.location.href = "./triagem.html";
+            } 
+            else if (tipoUsuario === "medico") {
+                console.log("Redirecionando para medico...");
+                window.location.href = "./medico.html";
+            } 
+            else if (tipoUsuario === "atendimento") {
+                console.log("Redirecionando para atendimento...");
+                window.location.href = "./atendimento.html";
+            } 
+            else {
+                console.log("Tipo não reconhecido:", tipoUsuario);
+                alert("Tipo de usuário inválido ou não reconhecido: " + tipoUsuario);
+            }
+
+        } catch (erro) {
+            console.error("Erro na requisição:", erro);
+            alert("Erro ao conectar com o servidor. Veja o console.");
         }
-        
-    </script>
+    }
+</script>
+
 </body>
 </html>
-

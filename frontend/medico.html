@@ -1,131 +1,104 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-    <link rel="stylesheet" href="/frontend/css/medico.css">
+    <title>Painel Médico</title>
+    <link rel="stylesheet" href="/css/medico.css">
 </head>
 <body>
 
     <div class="container">
-        <h2> Painel Medico</h2>
-<div id="triagens"></div>
+        <h2>🏥 Painel Médico</h2>
+        <div id="triagens"></div>
 
-<hr>
+        <hr>
 
-<h3>Consulta</h3>
-
-<input id="paciente" placeholder="Paciente">
-<input id="Diagnostico" placeholder="Diagnostico">
-<input id="medicacao" placeholder="medicação">
-<textarea  id="obs" placeholder="Observações"></textarea>
-<button onclick="salvar()">
-    Salvar
-</button>   
-
-<script>
-
-    function carregar(){
+        <h3>Consulta</h3>
+        <input id="paciente" placeholder="Paciente" readonly>
+        <input id="diagnostico" placeholder="Diagnóstico">
+        <input id="medicacao" placeholder="Medicação">
+        <textarea id="obs" placeholder="Observações"></textarea>
         
-        fetch("/triagens")
+        <button onclick="salvar()">Salvar Consulta</button>   
+    </div>
 
-        .then(r => r.json())
+    <script>
+        function carregar(){
+            fetch("http://localhost:3000/triagens")
+            .then(r => r.json())
+            .then(data => {
+                const div = document.getElementById("triagens");
+                div.innerHTML = "";
 
-        .then(data => {
-const div = 
-document.getElementById("triagens");
+                if(data.length === 0) {
+                    div.innerHTML = "<p>Nenhum paciente aguardando na fila.</p>";
+                    return;
+                }
 
-div.innerHTML ="";
-
-data.forEach(t => {
-  
-    div.innerHTML += `
-    
-    <div class="card">
- <h3>${t.nome}</h3>
-
- <p>
-    <b>Sintoma</b>
-    ${t.sintoma || t.sintomas}
-    </p>
-
-    <p>
-        <b>Temperatura:</b>
-        ${t.temperatura || t.temp} °C
-        </p>
-<p>
-
-    <span class="${t.risco}">
-        ${t.risco}
-        </span>
-
-        </p>
-
-        <p>
-            <b>Alergia:</b>
-                ${t.alergia || "nenhuma"}
-                </p>
-                <p>
-                    <b>Observação</b>
-                    ${t.observação || "nenhuma"}
-                    </p>
-
-                    <button
-                    onclick='selecionar(
-                    "${t.nome}",
-                    "${t.alergia}"
-                    )'
-                    >
-
-                    atender
-                    </button>
-
-                    </div>
-        `
-});
-        });
-    }
-
-    function selecionar(nome,alergia){
-
-        document.getElementById("paciente").value = 
-        nome;
-
-        if(
-            alergia &&
-            alergia !== "Nenhuma"
-        ){}
-
-        alert(
-            "⚠️ Paciente possui alergia"
-        );
-    }
-    function salvar(){
-        fetch("/consulta", {
-
-            method:"POST",
-
-            headers:{
-                "Content-Type":"application/json"
-            },
-            body: JSON.stringify({
-
-                paciente: paciente.value,
-
-                diagnostico: diagnostico.value,
-                
-                medicacao: medicacao.value,
-
-                obs: obs.value
+                data.forEach(t => {
+                    div.innerHTML += `
+                        <div class="card" style="border: 1px solid #ccc; padding: 10px; margin-bottom: 10px;">
+                            <h3>${t.nome}</h3>
+                            <p><b>Sintoma:</b> ${t.sintoma || "Não informado"}</p>
+                            <p><b>Temperatura:</b> ${t.temperatura}°C</p>
+                            <p><b>Risco:</b> <span class="${t.risco}">${t.risco.toUpperCase()}</span></p>
+                            <p><b>Alergia:</b> ${t.alergia || "Nenhuma"}</p>
+                            <p><b>Observação:</b> ${t.observacao || "Nenhuma"}</p>
+                            <button onclick="selecionar('${t.nome}', '${t.alergia || ''}')">Atender</button>
+                        </div>
+                    `;
+                });
             })
-        });
+            .catch(err => console.error("Erro ao carregar triagens:", err));
+        }
 
-        alert("Consulta salva");
-    }
+        function selecionar(nome, alergia){
+            document.getElementById("paciente").value = nome;
 
-    carregar();
-</script>
-    
+            if(alergia && alergia.trim() !== "" && alergia.toLowerCase() !== "nenhuma") {
+                alert("⚠️ ATENÇÃO: O paciente possui alergia: " + alergia);
+            }
+        }
+
+        function salvar(){
+            const paciente = document.getElementById("paciente").value;
+            const diagnostico = document.getElementById("diagnostico").value;
+            const medicacao = document.getElementById("medicacao").value;
+            const obs = document.getElementById("obs").value;
+
+            if(!paciente) {
+                alert("Selecione um paciente na lista de triagem primeiro!");
+                return;
+            }
+
+            fetch("http://localhost:3000/consulta", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    paciente,
+                    diagnostico,
+                    medicacao, // Nota: Seu backend espera 'medicacao', o front antigo enviava 'medicamento'
+                    obs
+                })
+            })
+            .then(r => r.json())
+            .then(data => {
+                alert("Consulta salva com sucesso!");
+                // Limpa os campos da consulta
+                document.getElementById("paciente").value = "";
+                document.getElementById("diagnostico").value = "";
+                document.getElementById("medicacao").value = "";
+                document.getElementById("obs").value = "";
+                carregar(); // Recarrega a fila
+            })
+            .catch(err => alert("Erro ao salvar consulta."));
+        }
+
+        // Executa ao carregar a página
+        carregar();
+    </script>
 </body>
 </html>
