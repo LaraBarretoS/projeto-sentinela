@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="/frontend/css/medico.css">
+</head>
+<body>
+
+    <div class="container">
+        <h2> Painel Medico</h2>
+<div id="triagens"></div>
+
+<hr>
+
+<h3>Consulta</h3>
+
+<input id="paciente" placeholder="Paciente">
+<input id="Diagnostico" placeholder="Diagnostico">
+<input id="medicacao" placeholder="medicação">
+<textarea  id="obs" placeholder="Observações"></textarea>
+<button onclick="salvar()">
+    Salvar
+</button>   
+
+<script>
+
+    function carregar(){
+        
+        fetch("/triagens")
+
+        .then(r => r.json())
+
+        .then(data => {
+const div = 
+document.getElementById("triagens");
+
+div.innerHTML ="";
+
+data.forEach(t => {
+  
+    div.innerHTML += `
+    
+    <div class="card">
+ <h3>${t.nome}</h3>
+
+ <p>
+    <b>Sintoma</b>
+    ${t.sintoma || t.sintomas}
+    </p>
+
+    <p>
+        <b>Temperatura:</b>
+        ${t.temperatura || t.temp} °C
+        </p>
+<p>
+
+    <span class="${t.risco}">
+        ${t.risco}
+        </span>
+
+        </p>
+
+        <p>
+            <b>Alergia:</b>
+                ${t.alergia || "nenhuma"}
+                </p>
+                <p>
+                    <b>Observação</b>
+                    ${t.observação || "nenhuma"}
+                    </p>
+
+                    <button
+                    onclick='selecionar(
+                    "${t.nome}",
+                    "${t.alergia}"
+                    )'
+                    >
+
+                    atender
+                    </button>
+
+                    </div>
+        `
+});
+        });
+    }
+
+    function selecionar(nome,alergia){
+
+        document.getElementById("paciente").value = 
+        nome;
+
+        if(
+            alergia &&
+            alergia !== "Nenhuma"
+        ){}
+
+        alert(
+            "⚠️ Paciente possui alergia"
+        );
+    }
+    function salvar(){
+        fetch("/consulta", {
+
+            method:"POST",
+
+            headers:{
+                "Content-Type":"application/json"
+            },
+            body: JSON.stringify({
+
+                paciente: paciente.value,
+
+                diagnostico: diagnostico.value,
+                
+                medicacao: medicacao.value,
+
+                obs: obs.value
+            })
+        });
+
+        alert("Consulta salva");
+    }
+
+    carregar();
+</script>
+    
+</body>
+</html>

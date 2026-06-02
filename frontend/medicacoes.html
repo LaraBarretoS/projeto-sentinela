@@ -1,0 +1,34 @@
+!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="/frontend/medicacoes.css">
+</head>
+<body>
+    
+<div class="container">
+<h2>Medicações</h2>
+
+<div id="lista"></div>
+</div>
+
+<script>
+fetch("/medicacoes")
+.then(r => r.json())
+.then(data => {
+    const div = document.getElementById("lista");
+
+    data.forEach(m => {
+        div.innerHTML += `
+        <div class="card">
+            <b>Paciente:</b> ${m.paciente}<br>
+            <b>Diagnóstico:</b> ${m.diagnostico}<br>
+            <b>Medicações:</b> ${m.medicamento}<br>
+            </div>`;
+    });
+});
+</script>
+</body>
+</html>

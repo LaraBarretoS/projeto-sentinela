@@ -1,0 +1,78 @@
+body {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+    background-color: #eef2f6;
+}
+
+.container {
+    width: 90%;
+    max-width: 700px;
+    margin: 40px auto;
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
+}
+
+h2, h3 {
+    text-align: center;
+    color: #ffffff;
+}
+
+#triagem {
+    margin-top: 10px;
+}
+
+.card {
+    background-color: #f9fbfc;
+    border: 1px solid #ddd;
+    padding: 12px;
+    margin-top: 10px;
+    border-radius: 6px;
+}
+
+.card b {
+    color: #2c3e50;
+    font-size: 16px;
+}
+
+input {
+    width: 95%;
+    padding: 10px;
+    margin-top: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 14px;
+}
+
+button {
+    width: 100%;
+    padding: 10px;
+    margin-top: 15px;
+    background-color: #3a4155;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 15px;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #080713;
+}
+
+.verde {
+    color: green;
+    font-weight: bold;
+}
+
+.amarelo {
+    color: orange;
+    font-weight: bold;
+}
+
+.vermelho {
+    color: red;
+    font-weight: bold;
+} 
