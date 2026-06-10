@@ -133,8 +133,6 @@ app.get("/medicacoes", (req, res) => {
     res.json(db.consultas || []);
 });
 
-const PORT = process.env.PORT || 3000;
-
-app.listen(PORT, () => {
-    console.log("Servidor rodando na porta " + PORT);
+app.listen(3000, () => {
+    console.log("🏥 Hospital Pro rodando em http://localhost:3000");
 });
