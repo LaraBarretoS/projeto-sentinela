@@ -3,98 +3,151 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Triagem Hospitalar</title>
-    <link rel="stylesheet" href="/css/triagem.css">
+    <title>Enfermagem - Triagem Hospitalar</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: #f0f4f8; min-height: 100vh; padding: 30px; display: flex; justify-content: center; }
+        .dashboard { display: grid; grid-template-columns: 350px 1fr; gap: 30px; width: 100%; max-width: 1200px; }
+        
+        /* Coluna Esquerda: Fila */
+        .sidebar { background: white; padding: 24px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); height: fit-content; max-height: 85vh; overflow-y: auto; }
+        .sidebar h3 { color: #1a365d; margin-bottom: 16px; font-size: 18px; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px; }
+        .paciente-card { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 14px; margin-bottom: 12px; cursor: pointer; transition: all 0.2s ease; }
+        .paciente-card:hover { border-color: #3182ce; background-color: #ebf8ff; transform: translateY(-2px); }
+        .paciente-card h4 { color: #2d3748; margin-bottom: 4px; font-size: 15px; }
+        .paciente-card p { font-size: 12px; color: #718096; line-height: 1.4; }
+        .badge-tipo { display: inline-block; padding: 2px 6px; font-size: 10px; font-weight: bold; border-radius: 4px; margin-top: 5px; background: #e2e8f0; color: #4a5568; }
+        .badge-menor { background: #feebc8; color: #c05621; }
+
+        /* Coluna Direita: Formulário */
+        .main-content { background: white; padding: 35px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        h2 { color: #1a365d; margin-bottom: 24px; font-size: 24px; }
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .form-group { margin-bottom: 18px; }
+        .full-width { grid-column: span 2; }
+        label { display: block; margin-bottom: 6px; color: #4a5568; font-weight: 600; font-size: 14px; }
+        input, select, textarea { width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px; background-color: #f8fafc; transition: all 0.3s ease; }
+        input:focus, select:focus, textarea:focus { outline: none; border-color: #3182ce; background-color: #fff; box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.15); }
+        textarea { height: 100px; resize: none; }
+        
+        /* Resultado Manchester */
+        #resultado { margin-top: 20px; padding: 15px; border-radius: 6px; text-align: center; font-weight: bold; font-size: 16px; display: none; }
+        .vermelho { display: block !important; background-color: #fed7d7; color: #9b2c2c; border: 1px solid #e53e3e; }
+        .amarelo { display: block !important; background-color: #feebc8; color: #9c4221; border: 1px solid #dd6b20; }
+        .verde { display: block !important; background-color: #c6f6d5; color: #22543d; border: 1px solid #38a169; }
+
+        button { width: 100%; padding: 14px; background-color: #38a169; color: white; border: none; border-radius: 6px; font-size: 16px; font-weight: bold; cursor: pointer; transition: background 0.2s ease; margin-top: 15px; }
+        button:hover { background-color: #2f855a; }
+        .btn-limpar { background-color: #edf2f7; color: #4a5568; margin-top: 5px; }
+        .btn-limpar:hover { background-color: #e2e8f0; }
+    </style>
 </head>
 <body>
 
-    <div class="container">
-        <h2>🏥 Triagem Hospitalar</h2>
+    <div class="dashboard">
+        <div class="sidebar">
+            <h3>⏳ Fila de Espera</h3>
+            <div id="listaEspera">Puxando pacientes...</div>
+        </div>
 
-        <input id="nome" type="text" placeholder="Nome do paciente">
+        <div class="main-content">
+            <h2>🩺 Ficha de Triagem do Paciente</h2>
 
-        <select id="sintoma">
-            <option value="">Selecione um sintoma</option>
-            <option value="dor_leve">Dor leve</option>
-            <option value="febre">Febre</option>
-            <option value="tosse">Tosse</option>
-            <option value="coriza">Coriza</option>
-            <option value="dor_cabeca">Dor de cabeça</option>
-            <option value="falta_ar">Falta de ar</option>
-            <option value="enjoo">Enjoo</option>
-            <option value="vomito">Vômito</option>
-            <option value="dor_peito">Dor no peito</option>
-            <option value="tontura">Tontura</option>
-            <option value="dor_garganta">Dor de garganta</option>
-            <option value="calafrios">Calafrios</option>
-            <option value="diarreia">Diarreia</option>
-            <option value="desmaio">Desmaio</option>
-            <option value="pressao_alta">Pressão alta</option>
-            <option value="pressao_baixa">Pressão baixa</option>
-            <option value="palpitacao">Palpitação</option>
-            <option value="fadiga">Fadiga</option>
-            <option value="sangramento">Sangramento</option>
-            <option value="alergia">Alergia</option>
-            <option value="coceira">Coceira</option>
-            <option value="ardencia">Ardência</option>
-            <option value="dor_abdominal">Dor abdominal</option>
-            <option value="dor_costas">Dor nas costas</option>
-            <option value="dor_ouvido">Dor no ouvido</option>
-            <option value="dor_olhos">Dor nos olhos</option>
-            <option value="visao_turva">Visão turva</option>
-            <option value="convulsao">Convulsão</option>
-            <option value="confusao_mental">Confusão mental</option>
-            <option value="ansiedade">Ansiedade</option>
-            <option value="insomnia">Insônia</option>
-            <option value="perda_apetite">Perda de apetite</option>
-            <option value="suor_excessivo">Suor excessivo</option>
-            <option value="fraqueza">Fraqueza</option>
-            <option value="dor_muscular">Dor muscular</option>
-            <option value="inchaco">Inchaço</option>
-            <option value="queimadura">Queimadura</option>
-            <option value="ferimento">Ferimento</option>
-            <option value="dificuldade_engolir">Dificuldade para engolir</option>
-            <option value="falta_apetite">Falta de apetite</option>
-            <option value="perda_consciencia">Perda de consciência</option>
-        </select>
+            <div class="form-grid">
+                <div class="form-group full-width">
+                    <label for="nome">Nome do Paciente</label>
+                    <input id="nome" placeholder="Selecione na lista ou digite do zero">
+                </div>
 
-        <input type="number" placeholder="Temperatura" id="temp"/>
-        <input id="alergia" placeholder="Alergias" />
-        <textarea id="observacoes" placeholder="Observações"></textarea>
+                <div class="form-group">
+                    <label for="temp">Temperatura (°C)</label>
+                    <input type="number" step="0.1" placeholder="Ex: 36.5" id="temp">
+                </div>
 
-        <div id="resultado"></div>
+                <div class="form-group">
+                    <label for="sintoma">Sintoma Principal</label>
+                    <select id="sintoma">
+                        <option value="">Selecione o sintoma</option>
+                        <option value="falta_ar">Falta de ar grave</option>
+                        <option value="dor_peito">Dor forte no peito</option>
+                        <option value="desmaio">Desmaio / Perda de consciência</option>
+                        <option value="convulsao">Convulsão</option>
+                        <option value="sangramento">Sangramento ativo</option>
+                        <option value="febre">Febre</option>
+                        <option value="tosse">Tosse contínua</option>
+                        <option value="dor_cabeca">Dor de cabeça forte</option>
+                        <option value="enjoo">Enjoo / Vômito</option>
+                        <option value="dor_abdominal">Dor abdominal aguda</option>
+                        <option value="alergia">Reação Alérgica</option>
+                        <option value="dor_leve">Dor leve / Outros sintomas</option>
+                    </select>
+                </div>
 
-        <button onclick="salvar()">Salvar Triagem</button>
+                <div class="form-group full-width">
+                    <label for="alergia">Alergias Conhecidas</label>
+                    <input id="alergia" placeholder="Ex: Dipirona, Penicilina (Deixe em branco se não houver)">
+                </div>
+
+                <div class="form-group full-width">
+                    <label for="observacoes">Notas e Observações Clínicas</label>
+                    <textarea id="observacoes" placeholder="Descreva os detalhes dos sintomas relatados pelo paciente..."></textarea>
+                </div>
+            </div>
+
+            <div id="resultado"></div>
+
+            <button onclick="salvar()">Finalizar Triagem e Enviar ao Médico</button>
+            <button class="btn-limpar" onclick="limparFormulario()">Limpar Ficha</button>
+        </div>
     </div>
 
     <script>
+        // Função para carregar os pacientes vindo do Atendimento
+        function carregarFilaEspera() {
+            fetch("/pacientes")
+            .then(r => r.json())
+            .then(pacientes => {
+                const container = document.getElementById("listaEspera");
+                container.innerHTML = "";
+
+                if (pacientes.length === 0) {
+                    container.innerHTML = "<p style='color: #718096; font-size: 14px; text-align: center;'>Nenhum paciente na fila de espera.</p>";
+                    return;
+                }
+
+                pacientes.forEach(p => {
+                    const eMenor = p.idade < 18;
+                    container.innerHTML += `
+                        <div class="paciente-card" onclick="selecionarPaciente('${p.nome}', '${p.alergia || ''}')">
+                            <h4>${p.nome}</h4>
+                            <p><b>Idade:</b> ${p.idade} anos | <b>CPF:</b> ${p.cpf || 'Não inf.'}</p>
+                            ${p.telefone ? `<p><b>Tel:</b> ${p.telefone}</p>` : ''}
+                            ${eMenor ? `<p style="color: #dd6b20;"><b>Resp:</b> ${p.responsavel}</p>` : ''}
+                            <span class="badge-tipo">${p.tipo}</span>
+                            ${eMenor ? `<span class="badge-tipo badge-menor">Menor de Idade</span>` : ''}
+                        </div>
+                    `;
+                });
+            })
+            .catch(err => console.error("Erro ao carregar fila de espera:", err));
+        }
+
+        function selecionarPaciente(nome, alergia) {
+            document.getElementById("nome").value = nome;
+            document.getElementById("alergia").value = alergia;
+            // Foca na temperatura para o enfermeiro agilizar o atendimento
+            document.getElementById("temp").focus();
+        }
+
         function classificarRisco(sintoma, temperatura){
-            const vermelhos = [
-                "falta_ar", "dor_peito", "desmaio", "convulsao", "confusao_mental",
-                "pressao_alta", "pressao_baixa", "palpitacao", "sangramento", 
-                "visao_turva", "perda_consciencia", "dificuldade_engolir"
-            ];
-
-            const amarelos = [
-                "dor_leve", "febre", "tosse", "coriza", "dor_cabeca", "enjoo", "vomito",
-                "tontura", "dor_garganta", "calafrios", "diarreia", "fadiga", "alergia",
-                "coceira", "ardencia", "dor_abdominal", "dor_costas", "dor_ouvido",
-                "dor_olhos", "ansiedade", "insomnia", "perda_apetite", "falta_apetite",
-                "suor_excessivo", "fraqueza", "dor_muscular", "inchaco", "queimadura", "ferimento"
-            ];
-
-            if(temperatura >= 39){
+            const vermelhos = ["falta_ar", "dor_peito", "desmaio", "convulsao", "sangramento"];
+            
+            if(temperatura >= 39 || vermelhos.includes(sintoma)){
                 return "vermelho";
             }
-
-            if (vermelhos.includes(sintoma)){
-                return "vermelho";
-            }
-
-            if(amarelos.includes(sintoma)){
+            if(sintoma && sintoma !== "dor_leve"){
                 return "amarelo";
             }
-
             return "verde";
         }
 
@@ -111,39 +164,42 @@
                 return;
             }
 
-            // CORRIGIDO: Rota alterada para "/triagens" para bater com o server.js do professor
             fetch("/triagens", {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    nome,
-                    sintoma,
-                    temperatura,
-                    alergia,
-                    observacao,
-                    risco
-                })
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ nome, sintoma, temperatura, alergia, observacao, risco })
             })
-            .then(r => r.json())
+            .then(resposta => {
+                if (!resposta.ok) throw new Error("Erro de processamento no servidor.");
+                return resposta.json();
+            })
             .then(data => {
                 const resultado = document.getElementById("resultado");
                 resultado.className = risco;
-                resultado.innerHTML = "Classificação: " + risco.toUpperCase();
-                alert("Triagem salva com sucesso!");
+                resultado.innerHTML = "TRIAGEM CONCLUÍDA: CLASSIFICAÇÃO " + risco.toUpperCase();
                 
-                document.getElementById("nome").value = "";
-                document.getElementById("sintoma").value = "";
-                document.getElementById("temp").value = "";
-                document.getElementById("alergia").value = "";
-                document.getElementById("observacoes").value = "";
+                alert("Triagem concluída e encaminhada ao Painel Médico!");
+                limparFormulario();
+                carregarFilaEspera(); // Atualiza a lista da esquerda tirando quem já foi triado
             })
             .catch(err => {
                 console.error(err);
-                alert("Erro ao salvar triagem.");
+                alert("Erro ao salvar triagem: " + err.message);
             });
         }
+
+        function limparFormulario() {
+            document.getElementById("nome").value = "";
+            document.getElementById("sintoma").value = "";
+            document.getElementById("temp").value = "";
+            document.getElementById("alergia").value = "";
+            document.getElementById("observacoes").value = "";
+            document.getElementById("resultado").style.display = "none";
+        }
+
+        // Inicia carregando a fila e atualiza a cada 10 segundos automaticamente
+        carregarFilaEspera();
+        setInterval(carregarFilaEspera, 10000);
     </script>
 </body>
 </html>
