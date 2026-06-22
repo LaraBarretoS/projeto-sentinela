@@ -144,7 +144,7 @@ app.post("/triagens", (req, res) => {
 });
 
 // =========================
-// CONSULTA (Médico)
+// CONSULTA (Médico) - ATUALIZADO
 // =========================
 app.post("/consulta", (req, res) => {
     try {
@@ -160,18 +160,23 @@ app.post("/consulta", (req, res) => {
 
         if (!db.consultas) db.consultas = [];
         db.consultas.push(consulta);
+
+        // REGRA DE SUMIR DA FILA: Procura o paciente na lista global pelo nome e muda o status dele
+        if (db.pacientes) {
+            // Buscamos o paciente que estava aguardando atendimento médico
+            const index = db.pacientes.findIndex(p => p.nome.toLowerCase() === req.body.paciente.toLowerCase());
+            if (index !== -1) {
+                db.pacientes[index].status = "finalizado"; // Agora ele some de todas as filas ativos
+            }
+        }
+
         writeDB(db);
         res.json(consulta);
     } catch (e) {
+        console.error("Erro ao salvar consulta:", e);
         res.status(500).json({ erro: "Falha ao salvar consulta" });
     }
 });
-
-app.get("/medicacoes", (req, res) => {
-    const db = readDB();
-    res.json(db.consultas || []);
-});
-
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`Servidor rodando na porta ${PORT}`);
