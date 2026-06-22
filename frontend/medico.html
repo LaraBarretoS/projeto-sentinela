@@ -3,94 +3,151 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Painel Médico</title>
-    <link rel="stylesheet" href="/css/medico.css">
+    <title>Painel Médico - Prontuário Eletrônico</title>
 </head>
 <body>
 
-    <div class="container">
-        <h2>🏥 Painel Médico</h2>
-        <div id="triagens"></div>
+    <div class="dashboard">
+        <div class="sidebar">
+            <h3>📥 Pacientes Aguardando</h3>
+            <div id="listaTriagens">Carregando fila...</div>
+        </div>
 
-        <hr>
+        <div class="main-content">
+            <h2>📋 Atendimento Médico / Prontuário</h2>
 
-        <h3>Consulta</h3>
-        <input id="paciente" placeholder="Paciente" readonly>
-        <input id="diagnostico" placeholder="Diagnóstico">
-        <input id="medicacao" placeholder="Medicação">
-        <textarea id="obs" placeholder="Observações"></textarea>
-        
-        <button onclick="salvar()">Salvar Consulta</button>   
+            <div id="boxDadosTriagem" class="dados-triagem-box">
+                <strong style="color: #2c5282; display:block; margin-bottom: 5px;">⚠️ Dados da Triagem Recente:</strong>
+                <p id="infoTriagemSintoma"></p>
+                <p id="infoTriagemObs"></p>
+            </div>
+
+            <div class="form-group">
+                <label for="paciente">Paciente Selecionado</label>
+                <input id="paciente" placeholder="Clique em um paciente da fila de espera" readonly>
+            </div>
+
+            <div class="form-group">
+                <label for="diagnostico">Diagnóstico / Hipótese Diagnóstica</label>
+                <input id="diagnostico" placeholder="Ex: Amigdalite Bacteriana, Crise Hipertensiva...">
+            </div>
+
+            <div class="form-group">
+                <label for="medicacao">Prescrição Médica / Medicações</label>
+                <textarea id="medicacao" placeholder="Ex: Amoxicilina 500mg - Tomar 1 cp de 8h em 8h por 7 dias. Dipirona 1g se dor..."></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="obs">Orientações ao Paciente / Observações</label>
+                <textarea id="obs" placeholder="Ex: Retornar se houver piora ou febre persistente por mais de 48h. Repouso..."></textarea>
+            </div>
+
+            <button onclick="salvarConsulta()">Finalizar Atendimento e Liberar Paciente</button>
+        </div>
     </div>
 
     <script>
-        function carregar(){
-            // CORRIGIDO: Rota relativa para buscar a fila de triagens
+        // Carrega a lista de pacientes triados
+        function carregarFilaMedica() {
             fetch("/triagens")
             .then(r => r.json())
-            .then(data => {
-                const div = document.getElementById("triagens");
-                div.innerHTML = "";
+            .then(triagens => {
+                const container = document.getElementById("listaTriagens");
+                container.innerHTML = "";
 
-                if(data.length === 0) {
-                    div.innerHTML = "<p>Nenhum paciente aguardando na fila.</p>";
+                if (triagens.length === 0) {
+                    container.innerHTML = "<p style='color: #718096; font-size: 14px; text-align: center; margin-top: 10px;'>Nenhum paciente aguardando atendimento clínico.</p>";
                     return;
                 }
 
-                data.forEach(t => {
-                    div.innerHTML += `
-                        <div class="card" style="border: 1px solid #ccc; padding: 10px; margin-bottom: 10px; cursor: pointer;" onclick="selecionar('${t.nome}')">
-                            <b>Paciente:</b> ${t.nome}<br>
-                            <b>Sintoma:</b> ${t.sintoma}<br>
-                            <b>Risco:</b> <span class="badge ${t.risco}">${t.risco.toUpperCase()}</span>
+                // Organiza para colocar os de risco VERMELHO no topo da fila automaticamente!
+                triagens.sort((a, b) => {
+                    const pesos = { vermelho: 3, amarelo: 2, verde: 1 };
+                    return (pesos[b.risco] || 0) - (pesos[a.risco] || 0);
+                });
+
+                triagens.forEach(t => {
+                    const classeBorda = `border-${t.risco}`;
+                    const classeBadge = `badge-${t.risco}`;
+                    
+                    // Formata o nome do sintoma para exibição limpa
+                    const sintomaFormatado = t.sintoma.replace("_", " ");
+
+                    container.innerHTML += `
+                        <div class="card-triagem ${classeBorda}" onclick="selecionarPaciente('${t.nome}', '${sintomaFormatado}', '${t.temperatura}', '${t.alergia || 'Nenhuma'}', '${t.observacao || 'Sem notas'}')">
+                            <h4>${t.nome}</h4>
+                            <p><b>Temp:</b> ${t.temperatura}°C | <b>Alergias:</b> ${t.alergia || 'Não'}</p>
+                            <p><b>Sintoma:</b> <span style="text-transform: capitalize;">${sintomaFormatado}</span></p>
+                            <span class="badge-risco ${classeBadge}">${t.risco}</span>
                         </div>
                     `;
                 });
             })
-            .catch(err => console.error(err));
+            .catch(err => console.error("Erro ao carregar triagens:", err));
         }
 
-        function selecionar(nome) {
+        // Quando o médico clica no card, preenche a tela
+        function selecionarPaciente(nome, sintoma, temperatura, alergia, observacao) {
             document.getElementById("paciente").value = nome;
+            
+            // Exibe e preenche a caixinha com o resumo da triagem da enfermagem
+            const box = document.getElementById("boxDadosTriagem");
+            box.style.display = "block";
+            document.getElementById("infoTriagemSintoma").innerHTML = `<b>Queixa Principal:</b> ${sintoma} (${temperatura}°C) | <b>Alergia:</b> <span style="color:#e53e3e; font-weight:bold;">${alergia}</span>`;
+            document.getElementById("infoTriagemObs").innerHTML = `<b>Notas da Enfermagem:</b> <i>"${observacao}"</i>`;
+
+            // Foca o cursor direto no campo de diagnóstico para poupar cliques ao médico
+            document.getElementById("diagnostico").focus();
         }
 
-        function salvar(){
+        // Salva a consulta e faz o paciente sumir
+        function salvarConsulta() {
             const paciente = document.getElementById("paciente").value;
             const diagnostico = document.getElementById("diagnostico").value;
             const medicacao = document.getElementById("medicacao").value;
             const obs = document.getElementById("obs").value;
 
             if(!paciente) {
-                alert("Selecione um paciente na lista de triagem primeiro!");
+                alert("Por favor, selecione um paciente na fila de espera antes de salvar!");
                 return;
             }
 
-            // CORRIGIDO: Rota relativa para salvar a consulta
+            if(!diagnostico) {
+                alert("Por favor, preencha o diagnóstico do paciente.");
+                return;
+            }
+
             fetch("/consulta", {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    paciente,
-                    diagnostico,
-                    medicacao,
-                    obs
-                })
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ paciente, diagnostico, medicacao, obs })
             })
-            .then(r => r.json())
+            .then(r => {
+                if(!r.ok) throw new Error("Erro no servidor ao salvar consulta.");
+                return r.json();
+            })
             .then(data => {
-                alert("Consulta salva com sucesso!");
+                alert("Atendimento finalizado com sucesso! Paciente liberado.");
+                
+                // Limpa completamente a tela de prontuário
                 document.getElementById("paciente").value = "";
                 document.getElementById("diagnostico").value = "";
                 document.getElementById("medicacao").value = "";
                 document.getElementById("obs").value = "";
-                carregar(); 
+                document.getElementById("boxDadosTriagem").style.display = "none";
+                
+                // Recarrega a fila imediatamente (o paciente terá sumido devido ao novo filtro do backend)
+                carregarFilaMedica();
             })
-            .catch(err => alert("Erro ao salvar consulta."));
+            .catch(err => {
+                console.error(err);
+                alert("Erro ao encerrar consulta: " + err.message);
+            });
         }
 
-        carregar();
+        // Inicia e atualiza a fila automaticamente a cada 10 segundos
+        carregarFilaMedica();
+        setInterval(carregarFilaMedica, 10000);
     </script>
 </body>
 </html>
