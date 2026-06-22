@@ -1,51 +1,91 @@
-body {
+/* ==========================================================================
+   ATENDIMENTO.CSS - Cadastro de Pacientes (Recepção)
+   ========================================================================== */
+* {
+    box-sizing: border-box;
     margin: 0;
     padding: 0;
-    background-color: #eee1ea;
-    font-family: Arial, sans-serif;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+    background-color: #f0f4f8;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 20px;
 }
 
 .container {
-    width: 320px;
-    margin: 80px auto;
-    background-color: white;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 0 8px rgba(0,0,0,0.1);
-    text-align: center;
+    background: #ffffff;
+    padding: 40px;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+    width: 100%;
+    max-width: 500px;
 }
 
 h2 {
-    margin-bottom: 20px;
-    color: #333;
+    color: #1a365d;
+    margin-bottom: 24px;
+    font-size: 24px;
+    text-align: center;
 }
 
-input,
-select {
-    width: 90%;
-    padding: 10px;
-    margin-top: 10px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
+.form-group {
+    margin-bottom: 18px;
+}
+
+label {
+    display: block;
+    margin-bottom: 6px;
+    color: #4a5568;
+    font-weight: 600;
     font-size: 14px;
 }
 
-input[type="file"] {
-    background-color: #fdfdfd;
+input, select {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    font-size: 15px;
+    background-color: #f8fafc;
+    transition: all 0.3s ease;
+}
+
+input:focus, select:focus {
+    outline: none;
+    border-color: #3182ce;
+    background-color: #ffffff;
+    box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.15);
+}
+
+/* Container do Responsável (Menor de idade) */
+.menor-container {
+    display: none; /* Controlado via JS */
+    background-color: #fffaf0;
+    border-left: 4px solid #dd6b20;
+    padding: 14px;
+    border-radius: 0 6px 6px 0;
+    margin-top: 10px;
 }
 
 button {
-    width: 95%;
-    padding: 10px;
-    margin-top: 15px;
-    background-color: #084a3f;
+    width: 100%;
+    padding: 14px;
+    background-color: #3182ce;
     color: white;
     border: none;
-    border-radius: 5px;
-    font-size: 15px;
+    border-radius: 6px;
+    font-size: 16px;
+    font-weight: bold;
     cursor: pointer;
+    transition: background-color 0.2s ease;
+    margin-top: 10px;
 }
 
 button:hover {
-    background-color: #c4e9d1;
+    background-color: #2b6cb0;
 }
