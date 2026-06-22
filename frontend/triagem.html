@@ -99,51 +99,52 @@
         }
 
         function salvar(){
-            const nome = document.getElementById("nome").value;
-            const sintoma = document.getElementById("sintoma").value;
-            const temperatura = Number(document.getElementById("temp").value);
-            const alergia = document.getElementById("alergia").value;
-            const observacao = document.getElementById("observacoes").value;
-            const risco = classificarRisco(sintoma, temperatura);
+    const nome = document.getElementById("nome").value;
+    const sintoma = document.getElementById("sintoma").value;
+    const temperatura = Number(document.getElementById("temp").value);
+    const alergia = document.getElementById("alergia").value;
+    const observacao = document.getElementById("observacoes").value;
+    const risco = classificarRisco(sintoma, temperatura);
 
-            if(!nome || !sintoma) {
-                alert("Por favor, preencha o nome do paciente e selecione um sintoma.");
-                return;
-            }
+    if(!nome || !sintoma) {
+        alert("Por favor, preencha o nome do paciente e selecione um sintoma.");
+        return;
+    }
 
-            fetch("http://localhost:3000/triagem", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    nome,
-                    sintoma,
-                    temperatura,
-                    alergia,
-                    observacao,
-                    risco
-                })
-            })
-            .then(r => r.json())
-            .then(data => {
-                const resultado = document.getElementById("resultado");
-                resultado.className = risco;
-                resultado.innerHTML = "Classificação: " + risco.toUpperCase();
-                alert("Triagem salva com sucesso!");
-                
-                // Limpa o formulário para a próxima triagem
-                document.getElementById("nome").value = "";
-                document.getElementById("sintoma").value = "";
-                document.getElementById("temp").value = "";
-                document.getElementById("alergia").value = "";
-                document.getElementById("observacoes").value = "";
-            })
-            .catch(err => {
-                console.error(err);
-                alert("Erro ao salvar triagem.");
-            });
-        }
+    // CORRIGIDO: Removido o http://localhost:3000
+    fetch("/triagem", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            nome,
+            sintoma,
+            temperatura,
+            alergia,
+            observacao,
+            risco
+        })
+    })
+    .then(r => r.json())
+    .then(data => {
+        const resultado = document.getElementById("resultado");
+        resultado.className = risco;
+        resultado.innerHTML = "Classificação: " + risco.toUpperCase();
+        alert("Triagem salva com sucesso!");
+        
+        // Limpa o formulário para a próxima triagem
+        document.getElementById("nome").value = "";
+        document.getElementById("sintoma").value = "";
+        document.getElementById("temp").value = "";
+        document.getElementById("alergia").value = "";
+        document.getElementById("observacoes").value = "";
+    })
+    .catch(err => {
+        console.error(err);
+        alert("Erro ao salvar triagem.");
+    });
+}
     </script>
 </body>
 </html>
