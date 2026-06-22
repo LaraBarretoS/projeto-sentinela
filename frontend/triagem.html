@@ -111,21 +111,20 @@
         return;
     }
 
-    // CORRIGIDO: Removido o http://localhost:3000
-    fetch("/triagem", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-            nome,
-            sintoma,
-            temperatura,
-            alergia,
-            observacao,
-            risco
-        })
+    fetch("/triagens", {
+    method: "POST",
+    headers: {
+        "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+        nome,
+        sintoma,
+        temperatura,
+        alergia,
+        observacao,
+        risco
     })
+})
     .then(r => r.json())
     .then(data => {
         const resultado = document.getElementById("resultado");
