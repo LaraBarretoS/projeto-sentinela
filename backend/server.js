@@ -106,7 +106,12 @@ app.post("/atendimentos", (req, res) => {
 // =========================
 app.get("/triagens", (req, res) => {
     const db = readDB();
-    res.json(db.triagens);
+    // Filtra para o médico ver apenas triagens de pacientes cujo status ainda NÃO é "finalizado"
+    const triagensAtivas = db.triagens.filter(t => {
+        const paciente = db.pacientes.find(p => p.nome.toLowerCase() === t.nome.toLowerCase());
+        return !paciente || paciente.status !== "finalizado";
+    });
+    res.json(triagensAtivas);
 });
 
 app.post("/triagens", (req, res) => {
