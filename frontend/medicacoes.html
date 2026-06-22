@@ -14,13 +14,14 @@
     </div>
 
     <script>
-        fetch("http://localhost:3000/medicacoes")
+        // CORRIGIDO: Rota relativa para puxar do Render
+        fetch("/medicacoes")
         .then(r => r.json())
         .then(data => {
             const div = document.getElementById("lista");
             div.innerHTML = "";
 
-            if(data.length === 0) {
+            if(!data || data.length === 0) {
                 div.innerHTML = "<p>Nenhuma medicação receitada ainda.</p>";
                 return;
             }
@@ -31,11 +32,12 @@
                     <b>Paciente:</b> ${m.paciente || "Não informado"}<br>
                     <b>Diagnóstico:</b> ${m.diagnostico || "Não informado"}<br>
                     <b>Medicações:</b> ${m.medicacao || "Nenhuma medicação listada"}<br>
-                    ${m.obs ? `<b>Observações:</b> ${m.obs}<br>` : ''}
-                </div>`;
+                    ${m.obs ? `<b>Observações:</b> ${m.obs}` : ""}
+                </div>
+                `;
             });
         })
-        .catch(err => console.error("Erro ao carregar medicações:", err));
+        .catch(err => console.error(err));
     </script>
 </body>
 </html>
