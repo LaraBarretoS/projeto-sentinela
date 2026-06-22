@@ -25,7 +25,8 @@
 
     <script>
         function carregar(){
-            fetch("http://localhost:3000/triagens")
+            // CORRIGIDO: Rota relativa para buscar a fila de triagens
+            fetch("/triagens")
             .then(r => r.json())
             .then(data => {
                 const div = document.getElementById("triagens");
@@ -38,27 +39,19 @@
 
                 data.forEach(t => {
                     div.innerHTML += `
-                        <div class="card" style="border: 1px solid #ccc; padding: 10px; margin-bottom: 10px;">
-                            <h3>${t.nome}</h3>
-                            <p><b>Sintoma:</b> ${t.sintoma || "Não informado"}</p>
-                            <p><b>Temperatura:</b> ${t.temperatura}°C</p>
-                            <p><b>Risco:</b> <span class="${t.risco}">${t.risco.toUpperCase()}</span></p>
-                            <p><b>Alergia:</b> ${t.alergia || "Nenhuma"}</p>
-                            <p><b>Observação:</b> ${t.observacao || "Nenhuma"}</p>
-                            <button onclick="selecionar('${t.nome}', '${t.alergia || ''}')">Atender</button>
+                        <div class="card" style="border: 1px solid #ccc; padding: 10px; margin-bottom: 10px; cursor: pointer;" onclick="selecionar('${t.nome}')">
+                            <b>Paciente:</b> ${t.nome}<br>
+                            <b>Sintoma:</b> ${t.sintoma}<br>
+                            <b>Risco:</b> <span class="badge ${t.risco}">${t.risco.toUpperCase()}</span>
                         </div>
                     `;
                 });
             })
-            .catch(err => console.error("Erro ao carregar triagens:", err));
+            .catch(err => console.error(err));
         }
 
-        function selecionar(nome, alergia){
+        function selecionar(nome) {
             document.getElementById("paciente").value = nome;
-
-            if(alergia && alergia.trim() !== "" && alergia.toLowerCase() !== "nenhuma") {
-                alert("⚠️ ATENÇÃO: O paciente possui alergia: " + alergia);
-            }
         }
 
         function salvar(){
@@ -72,7 +65,8 @@
                 return;
             }
 
-            fetch("http://localhost:3000/consulta", {
+            // CORRIGIDO: Rota relativa para salvar a consulta
+            fetch("/consulta", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
@@ -80,24 +74,22 @@
                 body: JSON.stringify({
                     paciente,
                     diagnostico,
-                    medicacao, // Nota: Seu backend espera 'medicacao', o front antigo enviava 'medicamento'
+                    medicacao,
                     obs
                 })
             })
             .then(r => r.json())
             .then(data => {
                 alert("Consulta salva com sucesso!");
-                // Limpa os campos da consulta
                 document.getElementById("paciente").value = "";
                 document.getElementById("diagnostico").value = "";
                 document.getElementById("medicacao").value = "";
                 document.getElementById("obs").value = "";
-                carregar(); // Recarrega a fila
+                carregar(); 
             })
             .catch(err => alert("Erro ao salvar consulta."));
         }
 
-        // Executa ao carregar a página
         carregar();
     </script>
 </body>
