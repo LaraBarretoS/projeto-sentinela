@@ -1,46 +1,111 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-    <link rel="stylesheet" href="/frontend/css/atendimento.css">
+    <title>Recepção - Cadastro de Atendimento</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: #f0f4f8; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
+        .container { background: white; padding: 40px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); width: 100%; max-width: 500px; }
+        h2 { color: #1a365d; margin-bottom: 24px; font-size: 24px; text-align: center; display: flex; align-items: center; justify-content: center; gap: 10px; }
+        .form-group { margin-bottom: 18px; }
+        label { display: block; margin-bottom: 6px; color: #4a5568; font-weight: 600; font-size: 14px; }
+        input, select { width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 15px; transition: all 0.3s ease; background-color: #f8fafc; }
+        input:focus, select:focus { outline: none; border-color: #3182ce; box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.15); background-color: #fff; }
+        .menor-container { display: none; background-color: #fffaf0; border-left: 4px solid #dd6b20; padding: 12px; border-radius: 0 6px 6px 0; margin-top: 5px; }
+        button { width: 100%; padding: 14px; background-color: #3182ce; color: white; border: none; border-radius: 6px; font-size: 16px; font-weight: bold; cursor: pointer; transition: background 0.2s ease; margin-top: 10px; }
+        button:hover { background-color: #2b6cb0; }
+    </style>
 </head>
 <body>
 
     <div class="container">
-        <h2>Atendimento</h2>    
+        <h2>🏥 Novo Atendimento (Recepção)</h2>    
 
-        <input id="nome" placeholder="Nome">
-        <input id="cpf" placeholder="CPF">
+        <div class="form-group">
+            <label for="nome">Nome Completo</label>
+            <input id="nome" placeholder="Ex: João Silva">
+        </div>
 
-        <select id="tipo">
-            <option>Convenio</option>
-            <option>Particular</option>
-        </select>
+        <div class="form-group">
+            <label for="cpf">CPF</label>
+            <input id="cpf" placeholder="000.000.000-00">
+        </div>
 
-        <input type="file" id="foto">
+        <div class="form-group">
+            <label for="telefone">Telefone / WhatsApp</label>
+            <input id="telefone" placeholder="(11) 99999-9999">
+        </div>
 
-        <button onclick="cadastrar()">Cadastrar</button>
+        <div class="form-group">
+            <label for="idade">Idade</label>
+            <input type="number" id="idade" placeholder="Ex: 25" oninput="verificarIdade()">
+        </div>
+
+        <div class="form-group menor-container" id="campoResponsavel">
+            <label for="responsavel" style="color: #dd6b20;">Nome do Responsável (Obrigatório para menores)</label>
+            <input id="responsavel" placeholder="Nome do pai, mãe ou tutor">
+        </div>
+
+        <div class="form-group">
+            <label for="tipo">Tipo de Entrada</label>
+            <select id="tipo">
+                <option value="Convenio">Convênio Médico</option>
+                <option value="Particular">Particular</option>
+                <option value="SUS">Sistema Único de Saúde (SUS)</option>
+            </select>
+        </div>
+
+        <button onclick="cadastrar()">Cadastrar Paciente</button>
     </div>
 
     <script>
+        function verificarIdade() {
+            const idadeInput = document.getElementById("idade").value;
+            const campoResponsavel = document.getElementById("campoResponsavel");
+            
+            if (idadeInput && Number(idadeInput) < 18) {
+                campoResponsavel.style.display = "block";
+            } else {
+                campoResponsavel.style.display = "none";
+                document.getElementById("responsavel").value = "";
+            }
+        }
+
         function cadastrar(){
-            // CORRIGIDO: Rota relativa mudada para "/atendimentos" conforme o backend
+            const nome = document.getElementById("nome").value;
+            const cpf = document.getElementById("cpf").value;
+            const telefone = document.getElementById("telefone").value;
+            const idade = document.getElementById("idade").value;
+            const responsavel = document.getElementById("responsavel").value;
+            const tipo = document.getElementById("tipo").value;
+
+            if(!nome || !idade) {
+                alert("Por favor, preencha o Nome e a Idade do paciente.");
+                return;
+            }
+
+            if(Number(idade) < 18 && !responsavel) {
+                alert("Pacientes menores de idade necessitam do nome do responsável registrado.");
+                return;
+            }
+
             fetch("/atendimentos",{
-                method:"POST",
-                headers:{"Content-Type":"application/json"},
-                body: JSON.stringify({
-                    nome: nome.value,
-                    cpf: cpf.value,
-                    tipo: tipo.value
-                })
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({ nome, cpf, telefone, idade, responsavel, tipo })
             })
             .then(r => {
                 if(r.ok) {
-                    alert("Paciente enviado para triagem");
-                    nome.value = "";
-                    cpf.value = "";
+                    alert("Paciente enviado com sucesso para a fila de Triagem!");
+                    // Limpa o formulário
+                    document.getElementById("nome").value = "";
+                    document.getElementById("cpf").value = "";
+                    document.getElementById("telefone").value = "";
+                    document.getElementById("idade").value = "";
+                    document.getElementById("responsavel").value = "";
+                    document.getElementById("campoResponsavel").style.display = "none";
                 } else {
                     alert("Erro ao cadastrar paciente.");
                 }
