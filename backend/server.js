@@ -17,7 +17,6 @@ app.use(express.static(path.join(__dirname, "../frontend")));
 // =========================
 // BANCO DE DADOS
 // =========================
-// Força o caminho do arquivo a ser absoluto e correto na estrutura do Render
 const DB_FILE = path.resolve(__dirname, "db.json");
 
 function readDB() {
@@ -58,7 +57,6 @@ function writeDB(data) {
 app.post("/login", (req, res) => {
     const { usuario, senha } = req.body;
     const db = readDB();
-
     const user = db.usuarios.find(u => u.usuario === usuario && u.senha === senha);
 
     if (user) {
@@ -69,8 +67,16 @@ app.post("/login", (req, res) => {
 });
 
 // =========================
-// ATENDIMENTO
+// ATENDIMENTO (Recepção)
 // =========================
+// Rota para listar os pacientes cadastrados que ainda NÃO passaram pela triagem
+app.get("/pacientes", (req, res) => {
+    const db = readDB();
+    // Filtra para mostrar apenas pacientes com status "triagem" (aguardando)
+    const aguardando = db.pacientes.filter(p => p.status === "triagem");
+    res.json(aguardando);
+});
+
 app.post("/atendimentos", (req, res) => {
     try {
         const db = readDB();
@@ -79,10 +85,14 @@ app.post("/atendimentos", (req, res) => {
             nome: req.body.nome,
             cpf: req.body.cpf,
             tipo: req.body.tipo,
-            status: "triagem",
+            telefone: req.body.telefone || "",
+            idade: Number(req.body.idade) || 0,
+            responsavel: req.body.responsavel || "",
+            status: "triagem", // Aguardando triagem
             createdAt: new Date().toISOString()
         };
 
+        if (!db.pacientes) db.pacientes = [];
         db.pacientes.push(paciente);
         writeDB(db);
         res.json(paciente);
@@ -103,7 +113,6 @@ app.post("/triagens", (req, res) => {
     try {
         const db = readDB();
 
-        // CORRIGIDO: Aceita tanto 'observacao' vindo do front quanto 'observacoes'
         const triagem = {
             id: Date.now(),
             nome: req.body.nome,
@@ -115,12 +124,18 @@ app.post("/triagens", (req, res) => {
             createdAt: new Date().toISOString()
         };
 
-        // Garante que o array existe antes de dar o push
         if (!db.triagens) db.triagens = [];
-        
         db.triagens.push(triagem);
-        writeDB(db);
 
+        // REGRA DE INTEGRAÇÃO: Se o paciente existia na lista de espera, muda o status dele para "medico"
+        if (db.pacientes) {
+            const index = db.pacientes.findIndex(p => p.nome.toLowerCase() === req.body.nome.toLowerCase() && p.status === "triagem");
+            if (index !== -1) {
+                db.pacientes[index].status = "atendido";
+            }
+        }
+
+        writeDB(db);
         res.json(triagem);
     } catch (error) {
         console.error("Erro interno na rota /triagens:", error);
@@ -129,7 +144,7 @@ app.post("/triagens", (req, res) => {
 });
 
 // =========================
-// CONSULTA
+// CONSULTA (Médico)
 // =========================
 app.post("/consulta", (req, res) => {
     try {
@@ -146,24 +161,17 @@ app.post("/consulta", (req, res) => {
         if (!db.consultas) db.consultas = [];
         db.consultas.push(consulta);
         writeDB(db);
-
         res.json(consulta);
     } catch (e) {
         res.status(500).json({ erro: "Falha ao salvar consulta" });
     }
 });
 
-// =========================
-// MEDICAÇÕES
-// =========================
 app.get("/medicacoes", (req, res) => {
     const db = readDB();
     res.json(db.consultas || []);
 });
 
-// =========================
-// CONFIGURAÇÃO DA PORTA DINÂMICA
-// =========================
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`Servidor rodando na porta ${PORT}`);
