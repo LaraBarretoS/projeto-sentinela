@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Triagem Hospitalar</title>
+    <link rel="stylesheet" href="/css/triagem.css">
+</head>
+<body>
+
+    <div class="container">
+        <h2>🏥 Triagem Hospitalar</h2>
+
+        <input id="nome" type="text" placeholder="Nome do paciente">
+
+        <select id="sintoma">
+            <option value="">Selecione um sintoma</option>
+            <option value="dor_leve">Dor leve</option>
+            <option value="febre">Febre</option>
+            <option value="tosse">Tosse</option>
+            <option value="coriza">Coriza</option>
+            <option value="dor_cabeca">Dor de cabeça</option>
+            <option value="falta_ar">Falta de ar</option>
+            <option value="enjoo">Enjoo</option>
+            <option value="vomito">Vômito</option>
+            <option value="dor_peito">Dor no peito</option>
+            <option value="tontura">Tontura</option>
+            <option value="dor_garganta">Dor de garganta</option>
+            <option value="calafrios">Calafrios</option>
+            <option value="diarreia">Diarreia</option>
+            <option value="desmaio">Desmaio</option>
+            <option value="pressao_alta">Pressão alta</option>
+            <option value="pressao_baixa">Pressão baixa</option>
+            <option value="palpitacao">Palpitação</option>
+            <option value="fadiga">Fadiga</option>
+            <option value="sangramento">Sangramento</option>
+            <option value="alergia">Alergia</option>
+            <option value="coceira">Coceira</option>
+            <option value="ardencia">Ardência</option>
+            <option value="dor_abdominal">Dor abdominal</option>
+            <option value="dor_costas">Dor nas costas</option>
+            <option value="dor_ouvido">Dor no ouvido</option>
+            <option value="dor_olhos">Dor nos olhos</option>
+            <option value="visao_turva">Visão turva</option>
+            <option value="convulsao">Convulsão</option>
+            <option value="confusao_mental">Confusão mental</option>
+            <option value="ansiedade">Ansiedade</option>
+            <option value="insomnia">Insônia</option>
+            <option value="perda_apetite">Perda de apetite</option>
+            <option value="suor_excessivo">Suor excessivo</option>
+            <option value="fraqueza">Fraqueza</option>
+            <option value="dor_muscular">Dor muscular</option>
+            <option value="inchaco">Inchaço</option>
+            <option value="queimadura">Queimadura</option>
+            <option value="ferimento">Ferimento</option>
+            <option value="dificuldade_engolir">Dificuldade para engolir</option>
+            <option value="falta_apetite">Falta de apetite</option>
+            <option value="perda_consciencia">Perda de consciência</option>
+        </select>
+
+        <input type="number" placeholder="Temperatura" id="temp"/>
+        <input id="alergia" placeholder="Alergias" />
+        <textarea id="observacoes" placeholder="Observações"></textarea>
+
+        <div id="resultado"></div>
+
+        <button onclick="salvar()">Salvar Triagem</button>
+    </div>
+
+    <script>
+        function classificarRisco(sintoma, temperatura){
+            const vermelhos = [
+                "falta_ar", "dor_peito", "desmaio", "convulsao", "confusao_mental",
+                "pressao_alta", "pressao_baixa", "palpitacao", "sangramento", 
+                "visao_turva", "perda_consciencia", "dificuldade_engolir"
+            ];
+
+            const amarelos = [
+                "dor_leve", "febre", "tosse", "coriza", "dor_cabeca", "enjoo", "vomito",
+                "tontura", "dor_garganta", "calafrios", "diarreia", "fadiga", "alergia",
+                "coceira", "ardencia", "dor_abdominal", "dor_costas", "dor_ouvido",
+                "dor_olhos", "ansiedade", "insomnia", "perda_apetite", "falta_apetite",
+                "suor_excessivo", "fraqueza", "dor_muscular", "inchaco", "queimadura", "ferimento"
+            ];
+
+            if(temperatura >= 39){
+                return "vermelho";
+            }
+
+            if (vermelhos.includes(sintoma)){
+                return "vermelho";
+            }
+
+            if(amarelos.includes(sintoma)){
+                return "amarelo";
+            }
+
+            return "verde";
+        }
+
+        function salvar(){
+            const nome = document.getElementById("nome").value;
+            const sintoma = document.getElementById("sintoma").value;
+            const temperatura = Number(document.getElementById("temp").value);
+            const alergia = document.getElementById("alergia").value;
+            const observacao = document.getElementById("observacoes").value;
+            const risco = classificarRisco(sintoma, temperatura);
+
+            if(!nome || !sintoma) {
+                alert("Por favor, preencha o nome do paciente e selecione um sintoma.");
+                return;
+            }
+
+            // CORRIGIDO: Rota alterada para "/triagens" para bater com o server.js do professor
+            fetch("/triagens", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    nome,
+                    sintoma,
+                    temperatura,
+                    alergia,
+                    observacao,
+                    risco
+                })
+            })
+            .then(r => r.json())
+            .then(data => {
+                const resultado = document.getElementById("resultado");
+                resultado.className = risco;
+                resultado.innerHTML = "Classificação: " + risco.toUpperCase();
+                alert("Triagem salva com sucesso!");
+                
+                document.getElementById("nome").value = "";
+                document.getElementById("sintoma").value = "";
+                document.getElementById("temp").value = "";
+                document.getElementById("alergia").value = "";
+                document.getElementById("observacoes").value = "";
+            })
+            .catch(err => {
+                console.error(err);
+                alert("Erro ao salvar triagem.");
+            });
+        }
+    </script>
+</body>
+</html>
