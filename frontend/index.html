@@ -31,21 +31,20 @@
         const usuario = document.getElementById("usuario").value;
         const senha = document.getElementById("senha").value;
 
-        // 1. Verificar se a função está sendo chamada
         console.log("Tentando logar com:", usuario, senha);
 
         try {
+            // CORRIGIDO: Rota relativa para o Render
             const resposta = await fetch("/login", {
-             method: "POST",
-             headers: {
-             "Content-Type": "application/json"
-               },
-             body: JSON.stringify({ usuario, senha })
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ usuario, senha })
             });
 
             const data = await resposta.json();
 
-            // 2. Verificar o que o servidor respondeu exatamente
             console.log("Resposta bruta do servidor:", data);
             alert("O servidor respondeu! Olhe o console (F12). Tipo retornado: " + data.tipo);
 
@@ -54,7 +53,6 @@
                 return;
             }
 
-            // 3. Testar as condições limpando espaços invisíveis
             const tipoUsuario = data.tipo ? data.tipo.trim() : "";
 
             if (tipoUsuario === "triagem") {
