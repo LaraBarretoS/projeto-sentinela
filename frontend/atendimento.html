@@ -26,7 +26,8 @@
 
     <script>
         function cadastrar(){
-            fetch("http://localhost:3000/atendimento",{
+            // CORRIGIDO: Rota relativa mudada para "/atendimentos" conforme o backend
+            fetch("/atendimentos",{
                 method:"POST",
                 headers:{"Content-Type":"application/json"},
                 body: JSON.stringify({
@@ -34,11 +35,18 @@
                     cpf: cpf.value,
                     tipo: tipo.value
                 })
-            });
-            alert("Paciente enviado para triagem");
+            })
+            .then(r => {
+                if(r.ok) {
+                    alert("Paciente enviado para triagem");
+                    nome.value = "";
+                    cpf.value = "";
+                } else {
+                    alert("Erro ao cadastrar paciente.");
+                }
+            })
+            .catch(err => console.error(err));
         }
-
-        
     </script>
 </body>
 </html>
